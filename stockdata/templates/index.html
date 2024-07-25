@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Data Loader</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
+  <style>
+    .table-container {
+      width: 800px;
+      margin: 40px auto;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+    }
+    .load-button {
+      background-color: #4CAF50;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .load-button:hover {
+      background-color: #3e8e41;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center;">Stock Data Loader</h1>
+  <button id="loadDataButton" class="load-button">Load Data</button>
+  <div class="table-container">
+    <div id="stockData"></div>
+  </div>
+
+  <script>
+    $('#loadDataButton').on('click', function() {
+      $.ajax({
+        url: "{% url 'load_data' %}",
+        method: 'GET',
+        success: function(data) {
+          let html = `
+            <table id="stockTable" class="table table-striped table-bordered" style="width:100%">
+              <thead>
+                <tr>
+                  <th>Sr</th>
+                  <th>NSE Code</th>
+                  <th>Name</th>
+                  <th>BSE Code</th>
+                  <th>Per Chg</th>
+                  <th>Close</th>
+                  <th>Volume</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.map((stock, index) => `
+                  <tr>
+                    <td>${index + 1}</td>
+                    <td>${stock.nsecode}</td>
+                    <td>${stock.name}</td>
+                    <td>${stock.bsecode}</td>
+                    <td>${stock.per_chg}</td>
+                    <td>${stock.close}</td>
+                    <td>${stock.volume}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+          $('#stockData').html(html);
+          $('#stockTable').DataTable({
+            "paging": true,
+            "lengthChange": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false
+          });
+        },
+        error: function(error) {
+          console.error(error);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
